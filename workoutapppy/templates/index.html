@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FiTrace</title>
+    <style>
+        :root {
+            --primary: #00e5ff;
+            --secondary: #ff006e;
+            --dark-bg: #121212;
+            --panel-bg: rgba(30, 30, 40, 0.85);
+            --text-glow: 0 0 10px rgba(0, 229, 255, 0.8);
+            --btn-glow: 0 0 15px rgba(0, 229, 255, 0.6);
+            --input-glow: 0 0 8px rgba(0, 229, 255, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Orbitron', sans-serif;
+        }
+
+        @font-face {
+            font-family: 'Cyber';
+            src: url('https://cdnjs.cloudflare.com/ajax/libs/fonts/Orbitron-Regular.ttf');
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: white;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(to right, rgba(255, 0, 110, 0.03), rgba(0, 229, 255, 0.03));
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    transparent,
+                    transparent 50px,
+                    rgba(0, 229, 255, 0.03) 50px,
+                    rgba(0, 229, 255, 0.03) 51px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 50px,
+                    rgba(0, 229, 255, 0.03) 50px,
+                    rgba(0, 229, 255, 0.03) 51px
+                );
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        .login-box {
+            width: 400px;
+            background: var(--panel-bg);
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
+            position: relative;
+            transform-style: preserve-3d;
+            animation: panelFloat 6s ease-in-out infinite;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .login-box::before, .login-box::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            animation: borderGlow 4s linear infinite;
+            z-index: -1;
+        }
+
+        .login-box::after {
+            animation-delay: -2s;
+        }
+
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 28px;
+            position: relative;
+            text-shadow: var(--text-glow);
+            animation: pulseText 3s infinite;
+        }
+
+        .login-box h1::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary), transparent);
+            bottom: -10px;
+            left: 25%;
+        }
+
+        .textbox {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .textbox input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            outline: none;
+            color: white;
+            border-radius: 4px;
+            font-size: 16px;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .textbox input:focus {
+            border-color: var(--primary);
+            box-shadow: var(--input-glow);
+        }
+
+        .textbox input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: none;
+            background: linear-gradient(90deg, var(--primary), rgba(0, 229, 255, 0.7));
+            color: #121212;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            box-shadow: var(--btn-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+            animation: btnShine 3s infinite;
+        }
+
+        a.btn:nth-child(2) {
+            background: linear-gradient(90deg, var(--secondary), rgba(255, 0, 110, 0.7));
+        }
+
+        /* Animations */
+        @keyframes panelFloat {
+            0%, 100% { transform: translateY(0) rotateX(0deg); }
+            50% { transform: translateY(-10px) rotateX(2deg); }
+        }
+
+        @keyframes borderGlow {
+            0%, 100% {
+                border-color: var(--primary);
+                box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+            }
+            50% {
+                border-color: var(--secondary);
+                box-shadow: 0 0 15px rgba(255, 0, 110, 0.5);
+            }
+        }
+
+        @keyframes pulseText {
+            0%, 100% { text-shadow: 0 0 5px rgba(0, 229, 255, 0.5); }
+            50% { text-shadow: 0 0 15px rgba(0, 229, 255, 0.8); }
+        }
+
+        @keyframes btnShine {
+            0% { left: -100%; }
+            20% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .login-box {
+                width: 90%;
+                padding: 30px 20px;
+            }
+            
+            .login-box h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* Additional game-like elements */
+        .power-indicator {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.8); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-box">
+            <div class="power-indicator"></div>
+            <h1>FiTrace</h1>
+            <form method="post">
+                <div class="textbox">
+                    <input type="text" name="email" placeholder="Enter email" required>
+                </div>
+                <div class="textbox">
+                    <input type="password" name="password" placeholder="Enter password" required>
+                </div>
+                <button class="btn" type="submit">Login</button>
+                <a href="{{ url_for('register') }}" class="btn">Register</a>
+                <a href="#" class="btn">Reset Password</a>
+            </form>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

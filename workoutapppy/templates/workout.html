@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FiTrace</title>
+    <style>
+        :root {
+            --primary: #00e5ff;
+            --secondary: #ff006e;
+            --dark-bg: #121212;
+            --panel-bg: rgba(30, 30, 40, 0.85);
+            --text-glow: 0 0 10px rgba(0, 229, 255, 0.8);
+            --btn-glow: 0 0 15px rgba(0, 229, 255, 0.6);
+            --input-glow: 0 0 8px rgba(0, 229, 255, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Orbitron', sans-serif;
+        }
+
+        @font-face {
+            font-family: 'Cyber';
+            src: url('https://cdnjs.cloudflare.com/ajax/libs/fonts/Orbitron-Regular.ttf');
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: white;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(to right, rgba(255, 0, 110, 0.03), rgba(0, 229, 255, 0.03));
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    transparent,
+                    transparent 50px,
+                    rgba(0, 229, 255, 0.03) 50px,
+                    rgba(0, 229, 255, 0.03) 51px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 50px,
+                    rgba(0, 229, 255, 0.03) 50px,
+                    rgba(0, 229, 255, 0.03) 51px
+                );
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            padding-top: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        /* Navbar styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(18, 18, 24, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+            box-shadow: 0 2px 15px rgba(0, 229, 255, 0.2);
+        }
+
+        .navbar-brand {
+            color: var(--primary);
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: var(--text-glow);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-email {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+        }
+
+        .user-email::before {
+            content: "👤 ";
+            margin-right: 5px;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: linear-gradient(90deg, var(--secondary), rgba(255, 0, 110, 0.7));
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            letter-spacing: 1px;
+            box-shadow: 0 0 8px rgba(255, 0, 110, 0.4);
+        }
+
+        .logout-btn:hover {
+            box-shadow: 0 0 15px rgba(255, 0, 110, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Workout Box styles */
+        .workout-box {
+            width: 90%;
+            max-width: 800px;
+            background: var(--panel-bg);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
+            position: relative;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            backdrop-filter: blur(5px);
+            margin-bottom: 40px;
+        }
+
+        .workout-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .workout-box h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 24px;
+            position: relative;
+            text-shadow: var(--text-glow);
+        }
+
+        .workout-box h1::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary), transparent);
+            bottom: -10px;
+            left: 25%;
+        }
+
+        .workout-box h2 {
+            margin: 25px 0 15px;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 20px;
+            text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
+        }
+
+        .navigation-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(0, 229, 255, 0.1);
+            border-color: var(--primary);
+            box-shadow: var(--input-glow);
+            transform: translateY(-2px);
+        }
+
+        /* Form styles */
+        #workout-form {
+            margin: 20px 0;
+        }
+
+        .textbox {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .textbox label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+        }
+
+        .textbox select, .textbox input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .textbox select:focus, .textbox input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: var(--input-glow);
+            outline: none;
+        }
+
+        .textbox select option {
+            background-color: rgba(18, 18, 24, 0.95);
+            color: white;
+        }
+
+        /* Range slider styles */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            outline: none;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+        }
+
+        .slider-value-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #weight-value, #reps-value {
+            color: var(--primary);
+            font-weight: bold;
+            margin-left: 10px;
+            text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
+        }
+
+        /* Button styles */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.7), rgba(0, 150, 255, 0.7));
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+        }
+
+        .btn:hover {
+            box-shadow: var(--btn-glow);
+            transform: translateY(-2px);
+        }
+
+        .delete-btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .delete-btn {
+            background: linear-gradient(90deg, var(--secondary), rgba(255, 0, 110, 0.7));
+            box-shadow: 0 0 8px rgba(255, 0, 110, 0.4);
+        }
+
+        .delete-btn:hover {
+            box-shadow: 0 0 15px rgba(255, 0, 110, 0.6);
+        }
+
+        /* Logged sets list */
+        ul {
+            list-style-type: none;
+            margin: 15px 0;
+            padding: 0;
+        }
+
+        ul li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        ul li:hover {
+            background: rgba(0, 229, 255, 0.1);
+        }
+
+        ul li input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        ul li label {
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 1s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 15px;
+                height: auto;
+                flex-direction: column;
+                padding: 10px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 10px;
+            }
+            
+            .container {
+                padding-top: 120px;
+            }
+            
+            .workout-box {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar with user info and logout -->
+    <div class="navbar">
+        <div class="navbar-brand">FiTrace</div>
+        <div class="user-info">
+            <div class="user-email">{{ user_email }}</div>
+            <a href="{{ url_for('index') }}" class="logout-btn">LOGOUT</a>
+        </div>
+    </div>
+
+    <div class="container fade-in">
+        <div class="workout-box">
+            <h1>Workouts for {{ date }}</h1>
+            <div class="navigation-container">
+                <a class="back-link" href="{{ url_for('calendar', year=date[:4], month=date[5:7]) }}">Back to Calendar</a>
+            </div>
+            <form method="post" id="workout-form">
+                <input type="hidden" id="last-body-part" name="last_body_part" value="{{ request.form.get('last_body_part', '') }}">
+                <input type="hidden" id="last-exercise" name="last_exercise" value="{{ request.form.get('last_exercise', '') }}">
+                <div class="textbox">
+                    <label for="body-part">Muscle Group:</label>
+                    <select name="body_part" id="body-part" required>
+                        <option value="" disabled selected>Select Muscle Group</option>
+                        <option value="chest">Chest</option>
+                        <option value="back">Back</option>
+                        <option value="hamstrings">Hamstrings</option>
+                        <option value="quads">Quads</option>
+                        <option value="triceps">Triceps</option>
+                        <option value="biceps">Biceps</option>
+                        <option value="shoulders">Shoulders</option>
+                    </select>
+                </div>
+                <div class="textbox">
+                    <label for="exercise">Exercise:</label>
+                    <select name="exercise" id="exercise" required>
+                        <option value="" disabled selected>Select Exercise</option>
+                        <!-- Chest exercises -->
+                        <option value="barbell_bench_press" data-group="chest">Barbell Bench Press</option>
+                        <option value="dumbbell_bench_press" data-group="chest">Dumbbell Bench Press</option>
+                        <option value="incline_dumbbell_press" data-group="chest">Incline Dumbbell Press</option>
+                        <option value="decline_dumbbell_press" data-group="chest">Decline Dumbbell Press</option>
+                        <option value="push_ups" data-group="chest">Push-ups</option>
+                        <!-- Back exercises -->
+                        <option value="pull_ups" data-group="back">Pull-ups</option>
+                        <option value="barbell_rows" data-group="back">Barbell Rows</option>
+                        <option value="seated_cable_rows" data-group="back">Seated Cable Rows</option>
+                        <option value="lat_pulldown" data-group="back">Lat Pulldown</option>
+                        <option value="dumbbell_rows" data-group="back">Dumbbell Rows</option>
+                        <!-- Hamstrings exercises -->
+                        <option value="barbell_deadlifts" data-group="hamstrings">Barbell Deadlifts</option>
+                        <option value="romanian_deadlifts" data-group="hamstrings">Romanian Deadlifts</option>
+                        <option value="leg_curls" data-group="hamstrings">Leg Curls</option>
+                        <option value="hamstring_bridges" data-group="hamstrings">Hamstring Bridges</option>
+                        <!-- Quads exercises -->
+                        <option value="barbell_squats" data-group="quads">Barbell Squats</option>
+                        <option value="leg_press" data-group="quads">Leg Press</option>
+                        <option value="lunges" data-group="quads">Lunges</option>
+                        <option value="leg_extensions" data-group="quads">Leg Extensions</option>
+                        <!-- Triceps exercises -->
+                        <option value="barbell_triceps_extensions" data-group="triceps">Barbell Triceps Extensions</option>
+                        <option value="overhead_triceps_extensions" data-group="triceps">Overhead Triceps Extensions</option>
+                        <!-- Biceps exercises -->
+                        <option value="barbell_curls" data-group="biceps">Barbell Curls</option>
+                        <option value="dumbbell_curls" data-group="biceps">Dumbbell Curls</option>
+                        <option value="hammer_curls" data-group="biceps">Hammer Curls</option>
+                        <option value="concentration_curls" data-group="biceps">Concentration Curls</option>
+                        <!-- Shoulders exercises -->
+                        <option value="military_press" data-group="shoulders">Military Press (Barbell or Dumbbell)</option>
+                        <option value="lateral_raises" data-group="shoulders">Lateral Raises</option>
+                        <option value="front_raises" data-group="shoulders">Front Raises</option>
+                        <option value="rear_delt_flyes" data-group="shoulders">Rear Delt Flyes</option>
+                    </select>
+                </div>
+                <div class="textbox">
+                    <label for="weight">Weight (lbs):</label>
+                    <input type="range" name="weight" id="weight" min="0" max="500" step="5" required>
+                    <div class="slider-value-container">
+                        <span id="weight-value">0</span> lbs
+                    </div>
+                </div>
+                <div class="textbox">
+                    <label for="reps">Reps:</label>
+                    <input type="range" name="reps" id="reps" min="1" max="50" step="1" required>
+                    <div class="slider-value-container">
+                        <span id="reps-value">1</span> reps
+                    </div>
+                </div>
+                <div class="textbox">
+                    <label for="notes">Notes:</label>
+                    <input type="text" name="notes" id="notes">
+                </div>
+                <div class="button-container">
+                    <button class="btn" type="submit" name="action" value="Add Set">Add Set</button>
+                </div>
+            </form>
+            {% if workouts %}
+                <h2>Logged Sets</h2>
+                <form method="post" id="delete-form">
+                    <ul>
+                        {% for index in range(workouts|length) %}
+                            <li>
+                                <input type="checkbox" name="selected_sets" value="{{ index }}" id="set-{{ index }}">
+                                <label for="set-{{ index }}">
+                                    {{ workouts[index].body_part }} - {{ workouts[index].exercise }}: {{ workouts[index].weight }} lbs, {{ workouts[index].reps }} reps
+                                    {% if workouts[index].notes %}
+                                        (Notes: {{ workouts[index].notes }})
+                                    {% endif %}
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="delete-btn-container">
+                        <button class="btn delete-btn" type="submit" name="action" value="Delete">Delete Selected Set(s)</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial values for sliders
+            const weightSlider = document.getElementById('weight');
+            const weightValue = document.getElementById('weight-value');
+            const repsSlider = document.getElementById('reps');
+            const repsValue = document.getElementById('reps-value');
+            
+            weightValue.textContent = weightSlider.value;
+            repsValue.textContent = repsSlider.value;
+
+            // Event listeners for weight and reps sliders
+            weightSlider.addEventListener('input', function() {
+                weightValue.textContent = this.value;
+            });
+
+            repsSlider.addEventListener('input', function() {
+                repsValue.textContent = this.value;
+            });
+
+            // Filter exercises based on selected body part
+            const bodyPartSelector = document.getElementById('body-part');
+            const exerciseSelector = document.getElementById('exercise');
+            const lastBodyPart = document.getElementById('last-body-part').value;
+            const lastExercise = document.getElementById('last-exercise').value;
+
+            // Set previous selections if available
+            if (lastBodyPart) {
+                bodyPartSelector.value = lastBodyPart;
+                filterExercises(lastBodyPart);
+                
+                if (lastExercise) {
+                    exerciseSelector.value = lastExercise;
+                }
+            }
+
+            bodyPartSelector.addEventListener('change', function() {
+                filterExercises(this.value);
+            });
+
+            function filterExercises(selectedGroup) {
+                const options = exerciseSelector.querySelectorAll('option');
+                
+                // Reset the exercise selector
+                exerciseSelector.value = '';
+                
+                // First hide all options except the placeholder
+                options.forEach(option => {
+                    if (option.value === "") {
+                        option.style.display = 'block';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+                
+                // Then show only the ones for the selected group
+                options.forEach(option => {
+                    if (option.dataset.group === selectedGroup) {
+                        option.style.display = 'block';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
